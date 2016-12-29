@@ -2,16 +2,40 @@ import XCTest
 @testable import postgresql
 
 class postgresqlTests: XCTestCase {
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        XCTAssertEqual(postgresql().text, "Hello, World!")
+  let config  = Configuration(host: "localhost", port: "5432", user: "wess", passwd: "", database: "boxjoint")
+  
+  func testConnection() {
+    let db = Database(config)
+    
+    do {
+      try db.connect()
+    } catch let error as ConnectionError {
+      XCTFail("Connection Error: \(error.description.error) - Conn: \(error.description.conninfo)", file: #file, line: #line)
     }
+    catch {}
+  }
+  
+  func testQuery() {
+    let db = Database(config)
 
-
-    static var allTests : [(String, (postgresqlTests) -> () throws -> Void)] {
-        return [
-            ("testExample", testExample),
-        ]
+    do {
+      try db.connect()
+      
+      let result = try db.execute("SELECT * FROM users")
+      
+      print("RESULT: \(result)")
+      XCTAssertNotNil(result)
+      
+    } catch let error as ConnectionError {
+      XCTFail("Connection Error: \(error.description.error) - Conn: \(error.description.conninfo)", file: #file, line: #line)
     }
+    catch {}
+}
+
+  static var allTests : [(String, (postgresqlTests) -> () throws -> Void)] {
+    return [
+      ("testConnection", testConnection),
+      ("testQuery", testQuery),
+    ]
+  }
 }
